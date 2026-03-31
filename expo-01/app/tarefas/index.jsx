@@ -7,58 +7,131 @@ import {
   Text,
   TextInput,
   View,
+  Switch,
+  TouchableOpacity,
 } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { adicionarTarefa, getTarefas } from "@/back4app";
+import {
+  adicionarTarefa,
+  getTarefas,
+  atualizarTarefa,
+  deletarTarefa,
+} from "@/back4app";
 
 export default function TarefasPage() {
   const queryClient = useQueryClient();
+  const [descricao, setDescricao] = useState("");
+
+  // 🔍 GET
   const { data, isFetching } = useQuery({
     queryKey: ["tarefas"],
-    queryFn: getTarefas,
+    queryFn: async () => {
+      try {
+        return await getTarefas();
+      } catch (e) {
+        console.log("ERRO GET:", e.response?.data || e.message);
+        throw e;
+      }
+    },
   });
-  const mutation = useMutation({
+
+  // ➕ POST
+  const addMutation = useMutation({
     mutationFn: adicionarTarefa,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tarefas"] });
     },
+    onError: (e) => {
+      console.log("ERRO POST:", e.response?.data || e.message);
+    },
   });
-  const [descricao, setDescricao] = useState("");
+
+  // ✏️ PUT
+  const updateMutation = useMutation({
+    mutationFn: ({ objectId, concluida }) =>
+      atualizarTarefa(objectId, { concluida }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tarefas"] });
+    },
+    onError: (e) => {
+      console.log("ERRO PUT:", e.response?.data || e.message);
+    },
+  });
+
+  // 🗑️ DELETE
+  const deleteMutation = useMutation({
+    mutationFn: deletarTarefa,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tarefas"] });
+    },
+    onError: (e) => {
+      console.log("ERRO DELETE:", e.response?.data || e.message);
+    },
+  });
 
   async function handleAdicionarTarefaPress() {
     if (descricao.trim() === "") {
-      Alert.alert("Descrição inválida", "Preencha a descrição da tarefa", [
-        { text: "OK", onPress: () => {} },
-      ]);
+      Alert.alert("Descrição inválida", "Preencha a descrição da tarefa");
       return;
     }
-    mutation.mutate({ descricao });
+
+    addMutation.mutate({
+      descricao: descricao.trim(),
+      concluida: false, // ✅ obrigatório
+    });
+
     setDescricao("");
   }
 
   return (
     <View style={styles.container}>
-      {(isFetching || mutation.isPending) && <ActivityIndicator size="large" />}
+      {(isFetching ||
+        addMutation.isPending ||
+        updateMutation.isPending ||
+        deleteMutation.isPending) && (
+        <ActivityIndicator size="large" />
+      )}
+
       <TextInput
         style={styles.input}
         placeholder="Descrição"
         value={descricao}
         onChangeText={setDescricao}
       />
+
       <Button
         title="Adicionar Tarefa"
         onPress={handleAdicionarTarefaPress}
-        disabled={mutation.isPending}
       />
+
       <View style={styles.hr} />
+
       <View style={styles.tasksContainer}>
         {data?.map((t) => (
-          <Text
+          <View
             key={t.objectId}
-            style={t.concluida && styles.strikethroughText}
+            style={styles.taskRow}
           >
-            {t.descricao}
-          </Text>
+            <Switch
+              value={t.concluida}
+              onValueChange={(value) =>
+                updateMutation.mutate({
+                  objectId: t.objectId,
+                  concluida: value,
+                })
+              }
+            />
+
+            <Text style={t.concluida && styles.strikethroughText}>
+              {t.descricao}
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => deleteMutation.mutate(t.objectId)}
+            >
+              <Text>🗑️</Text>
+            </TouchableOpacity>
+          </View>
         ))}
       </View>
     </View>
@@ -72,13 +145,21 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   tasksContainer: {
+    width: "100%",
     paddingLeft: 15,
+  },
+  taskRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 8,
   },
   input: {
     borderColor: "black",
     borderWidth: 1,
     width: "90%",
     marginBottom: 5,
+    padding: 5,
   },
   hr: {
     height: 1,
@@ -87,9 +168,6 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   strikethroughText: {
-    textDecorationLine: "line-through", // Key property for strikethrough
-    textDecorationStyle: "solid", // Optional: Style of the line
-    textDecorationColor: "red", // Optional: Color of the line (iOS only)
-    // Other styles like fontSize, fontWeight, color can also be applied
+    textDecorationLine: "line-through",
   },
 });
