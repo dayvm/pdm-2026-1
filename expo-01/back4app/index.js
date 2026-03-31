@@ -17,9 +17,34 @@ export async function getTarefas() {
   return response.data.results;
 }
 
+export async function getTarefa(id) {
+  const response = await axios.get(`${urlBase}/${id}`, {
+    headers: headers,
+  });
+  return response.data;
+}
+
 export async function adicionarTarefa(novaTarefa) {
   const response = await axios.post(urlBase, novaTarefa, {
     headers: headersJson,
+  });
+  return response.data;
+}
+
+export async function atualizarTarefa(tarefaAtualizada) {
+  const response = await axios.put(
+    `${urlBase}/${tarefaAtualizada.id}`,
+    tarefaAtualizada,
+    {
+      headers: headersJson,
+    },
+  );
+  return response.data;
+}
+
+export async function removerTarefa(id) {
+  const response = await axios.delete(`${urlBase}/${id}`, {
+    headers: headers,
   });
   return response.data;
 }

@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   Button,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -10,8 +11,10 @@ import {
 } from "react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adicionarTarefa, getTarefas } from "@/back4app";
+import { useRouter } from "expo-router";
 
 export default function TarefasPage() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { data, isFetching } = useQuery({
     queryKey: ["tarefas"],
@@ -53,12 +56,14 @@ export default function TarefasPage() {
       <View style={styles.hr} />
       <View style={styles.tasksContainer}>
         {data?.map((t) => (
-          <Text
+          <Pressable
             key={t.objectId}
-            style={t.concluida && styles.strikethroughText}
+            onPress={() => router.push(`/tarefas/${t.objectId}`)}
           >
-            {t.descricao}
-          </Text>
+            <Text style={t.concluida && styles.strikethroughText}>
+              {t.descricao}
+            </Text>
+          </Pressable>
         ))}
       </View>
     </View>
