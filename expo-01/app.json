@@ -9,7 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dayvm.expo01",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +23,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.dayvm.expo01"
     },
     "web": {
       "output": "static",
@@ -44,17 +49,17 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "9858e7ed-da74-4f2b-8fa2-f07544205e7d"
-      }
-    },
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/9858e7ed-da74-4f2b-8fa2-f07544205e7d"
+      "url": "https://u.expo.dev/21f54a32-5938-4a19-bb8e-5c05440b6026"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "21f54a32-5938-4a19-bb8e-5c05440b6026"
+      }
     }
   }
 }
