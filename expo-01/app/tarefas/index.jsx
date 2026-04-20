@@ -18,7 +18,7 @@ import {
   adicionarTarefa,
   getTarefas,
   atualizarTarefa,
-  deletarTarefa,
+  removerTarefa,
 } from "@/api";
 
 export default function TarefasPage() {
@@ -67,7 +67,7 @@ export default function TarefasPage() {
 
   // 🗑️ DELETE
   const deleteMutation = useMutation({
-    mutationFn: deletarTarefa,
+    mutationFn: removerTarefa,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tarefas"] });
     },
